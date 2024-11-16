@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>手势解锁游戏</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        canvas {
+            border: 2px solid #e0e0e0;
+            margin: 20px auto;
+            display: block;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .game-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        p {
+            color: #666;
+            margin: 12px 0;
+            font-size: 16px;
+        }
+
+        .invalid {
+            color: #ff4444;
+        }
+
+        select {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 10px;
+            background-color: white;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #targetPoints {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        #complexity, #highScore {
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        .difficulty-section {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-info">
+            <h2>手势解锁游戏</h2>
+            <p>目标点：<span id="targetPoints"></span></p>
+            <p>当前复杂度：<span id="complexity">0</span></p>
+            <p>当前难度最高分：<span id="highScore">0</span></p>
+            <div class="difficulty-section">
+                难度：
+                <select id="difficulty" onchange="changeDifficulty()">
+                    <option value="3">简单模式 (3点)</option>
+                    <option value="4">中等模式 (4点)</option>
+                    <option value="5">困难模式 (5点)</option>
+                    <option value="6">序列模式 (5点序列)</option>
+                </select>
+            </div>
+            <button onclick="startNewGame()">开始新游戏</button>
+        </div>
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+    </div>
+    <script src="game.js"></script>
+    <script>
+        window.onload = function() {
+            startNewGame();
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            const highScore = localStorage.getItem(`highScore_${difficulty}`) || 0;
+            document.getElementById('highScore').textContent = highScore;
+        }
+
+        function changeDifficulty() {
+            const count = parseInt(document.getElementById('difficulty').value);
+            game.setTargetPoints(count);
+        }
+    </script>
+</body>
+</html> 
