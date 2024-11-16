@@ -89,6 +89,11 @@
             background-color: #f8f9fa;
             border-radius: 5px;
         }
+
+        #maxScore {
+            color: #e67e22;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +103,7 @@
             <p>目标点：<span id="targetPoints"></span></p>
             <p>当前复杂度：<span id="complexity">0</span></p>
             <p>当前难度最高分：<span id="highScore">0</span></p>
+            <p id="maxScoreText" style="display: none">理论最高分：<span id="maxScore" style="color: #e67e22; font-weight: bold">0</span></p>
             <div class="difficulty-section">
                 难度：
                 <select id="difficulty" onchange="changeDifficulty()">

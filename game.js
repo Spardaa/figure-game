@@ -139,7 +139,6 @@ class LockGame {
         const targetIds = this.targetPoints.map(p => p.id);
         
         const hasInvalidPoint = this.selectedPoints.some(point => !this.targetPoints.includes(point));
-        
         const containsAllTargets = targetIds.every(id => selectedIds.includes(id));
         
         if (hasInvalidPoint || !containsAllTargets) {
@@ -150,12 +149,25 @@ class LockGame {
         const complexity = this.calculateComplexity();
         document.getElementById('complexity').textContent = complexity;
         
+        const maxScore = this.calculateMaxScore();
+        
         this.difficulty = parseInt(document.getElementById('difficulty').value);
         if (complexity > this.highScores[this.difficulty]) {
             this.highScores[this.difficulty] = complexity;
             localStorage.setItem(`highScore_${this.difficulty}`, complexity);
             document.getElementById('highScore').textContent = complexity;
-            alert('新纪录！');
+            
+            if (complexity >= maxScore) {
+                document.getElementById('maxScoreText').style.display = 'block';
+                document.getElementById('maxScore').textContent = maxScore;
+                alert('恭喜！你达到了本局理论最高分！');
+            } else {
+                alert('新纪录！');
+            }
+        } else if (complexity >= maxScore) {
+            document.getElementById('maxScoreText').style.display = 'block';
+            document.getElementById('maxScore').textContent = maxScore;
+            alert('恭喜！你达到了本局理论最高分！');
         }
     }
 
@@ -284,6 +296,61 @@ class LockGame {
         }
         
         this.draw();
+        
+        document.getElementById('maxScoreText').style.display = 'none';
+    }
+
+    calculatePointsComplexity(point1, point2) {
+        const pos1 = this.getPointPosition(point1.id);
+        const pos2 = this.getPointPosition(point2.id);
+        return Math.abs(pos1.row - pos2.row) + Math.abs(pos1.col - pos2.col);
+    }
+
+    calculatePathComplexity(path, bonusPosition) {
+        let complexity = 0;
+        for (let i = 0; i < path.length - 1; i++) {
+            let stepComplexity = this.calculatePointsComplexity(path[i], path[i + 1]);
+            if (this.difficulty === 6 && (i + 1) === bonusPosition) {
+                stepComplexity *= 2;
+            }
+            complexity += stepComplexity;
+        }
+        return complexity;
+    }
+
+    generateAllPaths(points, path = [], paths = []) {
+        if (points.length === 0) {
+            paths.push([...path]);
+            return;
+        }
+        
+        for (let i = 0; i < points.length; i++) {
+            const current = points[i];
+            const remaining = points.filter((_, index) => index !== i);
+            path.push(current);
+            this.generateAllPaths(remaining, path, paths);
+            path.pop();
+        }
+        return paths;
+    }
+
+    calculateMaxScore() {
+        const allPaths = this.generateAllPaths(this.targetPoints);
+        let maxScore = 0;
+        
+        if (this.difficulty === 6) {
+            for (const path of allPaths) {
+                const score = this.calculatePathComplexity(path, this.bonusPosition);
+                maxScore = Math.max(maxScore, score);
+            }
+        } else {
+            for (const path of allPaths) {
+                const score = this.calculatePathComplexity(path);
+                maxScore = Math.max(maxScore, score);
+            }
+        }
+        
+        return maxScore;
     }
 }
 
