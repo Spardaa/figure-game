@@ -94,26 +94,67 @@
             color: #e67e22;
             font-weight: bold;
         }
+
+        .mode-switch {
+            margin-bottom: 20px;
+        }
+        
+        .mode-switch button {
+            margin: 0 10px;
+            padding: 8px 16px;
+            background-color: #ddd;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        .mode-switch button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #dailyMaxScore {
+            color: #e67e22;
+            font-weight: bold;
+        }
+        
+        #dailyAttempts {
+            color: #9b59b6;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="game-info">
             <h2>手势解锁游戏</h2>
-            <p>目标点：<span id="targetPoints"></span></p>
-            <p>当前复杂度：<span id="complexity">0</span></p>
-            <p>当前难度最高分：<span id="highScore">0</span></p>
-            <p id="maxScoreText" style="display: none">理论最高分：<span id="maxScore" style="color: #e67e22; font-weight: bold">0</span></p>
-            <div class="difficulty-section">
-                难度：
-                <select id="difficulty" onchange="changeDifficulty()">
-                    <option value="3">简单模式 (3点)</option>
-                    <option value="4">中等模式 (4点)</option>
-                    <option value="5">困难模式 (5点)</option>
-                    <option value="6">序列模式 (5点序列)</option>
-                </select>
+            <div class="mode-switch">
+                <button onclick="switchToNormalMode()" id="normalModeBtn" class="active">普通模式</button>
+                <button onclick="switchToDailyMode()" id="dailyModeBtn">每日挑战</button>
             </div>
-            <button onclick="startNewGame()">开始新游戏</button>
+            <div id="normalMode">
+                <p>目标点：<span id="targetPoints"></span></p>
+                <p>当前复杂度：<span id="complexity">0</span></p>
+                <p>当前难度最高分：<span id="highScore">0</span></p>
+                <p id="maxScoreText" style="display: none">理论最高分：<span id="maxScore">0</span></p>
+                <div class="difficulty-section">
+                    难度：
+                    <select id="difficulty" onchange="startNewGame()">
+                        <option value="3">简单模式 (3点)</option>
+                        <option value="4">中等模式 (4点)</option>
+                        <option value="5">困难模式 (5点)</option>
+                        <option value="6">序列模式 (5点序列)</option>
+                    </select>
+                </div>
+                <button onclick="startNewGame()">开始新游戏</button>
+            </div>
+            <div id="dailyMode" style="display: none">
+                <p>今日目标点：<span id="dailyTargetPoints"></span></p>
+                <p>当前复杂度：<span id="dailyComplexity">0</span></p>
+                <p>今日最高分：<span id="dailyHighScore">0</span></p>
+                <p>今日理论最高分：<span id="dailyMaxScore">0</span></p>
+                <p>尝试次数：<span id="dailyAttempts">0</span></p>
+                <button id="dailyChallengeBtn" onclick="startDailyChallenge()">开始挑战</button>
+            </div>
         </div>
         <canvas id="gameCanvas" width="300" height="300"></canvas>
     </div>
@@ -124,11 +165,6 @@
             const difficulty = parseInt(document.getElementById('difficulty').value);
             const highScore = localStorage.getItem(`highScore_${difficulty}`) || 0;
             document.getElementById('highScore').textContent = highScore;
-        }
-
-        function changeDifficulty() {
-            const count = parseInt(document.getElementById('difficulty').value);
-            game.setTargetPoints(count);
         }
     </script>
 </body>
