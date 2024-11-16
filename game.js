@@ -352,25 +352,42 @@ class LockGame {
         this.isDrawing = false;
         this.canStartNewAttempt = true;
 
-        // 检查并清除旧的记录
+        // 获取当前日期和存储的日期
         const currentDate = this.getDailySeed();
         const lastPlayedDate = localStorage.getItem('lastPlayedDate');
         
+        // 如果是新的一天，清除所有旧数据
         if (lastPlayedDate !== currentDate) {
-            localStorage.removeItem(`dailyAttempts_${lastPlayedDate}`);
-            localStorage.removeItem(`dailyHighScore_${lastPlayedDate}`);
+            // 清除所有与每日挑战相关的数据
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('daily') || key.includes('daily')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            // 更新最后游玩日期
             localStorage.setItem('lastPlayedDate', currentDate);
+            
+            // 重置所有每日挑战相关的显示和存储
+            localStorage.setItem(`dailyHighScore_${currentDate}`, '0');
+            localStorage.setItem(`dailyAttempts_${currentDate}`, '0');
+            
+            // 重置显示
+            document.getElementById('dailyAttempts').textContent = '0';
+            document.getElementById('dailyHighScore').textContent = '0';
+            document.getElementById('dailyComplexity').textContent = '0';
+            document.getElementById('dailyChallengeBtn').textContent = '开始挑战';
         }
 
+        // 生成今日的随机种子
         let seed = 0;
-        const dailySeed = this.getDailySeed();
-        for (let i = 0; i < dailySeed.length; i++) {
-            seed += dailySeed.charCodeAt(i);
+        for (let i = 0; i < currentDate.length; i++) {
+            seed += currentDate.charCodeAt(i);
         }
 
-        // 修改为生成6个目标点
+        // 生成目标点
         const usedIndices = new Set();
-        while (this.targetPoints.length < 6) {  // 改为6个点
+        while (this.targetPoints.length < 6) {
             seed++;
             const index = Math.floor(this.seededRandom(seed) * 9);
             if (!usedIndices.has(index)) {
@@ -379,8 +396,8 @@ class LockGame {
             }
         }
 
-        // 设置加倍步骤（现在是5步，所以范围是1-5）
-        this.bonusPosition = 1 + Math.floor(this.seededRandom(seed + 100) * 5);  // 改为1-5
+        // 设置加倍步骤
+        this.bonusPosition = 1 + Math.floor(this.seededRandom(seed + 100) * 5);
 
         // 计算并显示理论最高分
         const maxScore = this.calculateMaxScore();
@@ -390,17 +407,14 @@ class LockGame {
         document.getElementById('dailyTargetPoints').textContent = 
             `${this.targetPoints.map(p => p.id + 1).join(', ')} (第${this.bonusPosition}步双倍分数)`;
         
-        // 获取并显示今日尝试次数
+        // 获取当天的数据（确保使用新的一天的数据）
         const attempts = parseInt(localStorage.getItem(`dailyAttempts_${currentDate}`) || 0);
-        document.getElementById('dailyAttempts').textContent = attempts;
-        document.getElementById('dailyChallengeBtn').textContent = attempts > 0 ? '再试一次' : '开始挑战';
-
-        // 获取并显示今日最高分
         const dailyHighScore = parseInt(localStorage.getItem(`dailyHighScore_${currentDate}`) || 0);
+        
+        // 更新显示
+        document.getElementById('dailyAttempts').textContent = attempts;
         document.getElementById('dailyHighScore').textContent = dailyHighScore;
-
-        // 清除当前复杂度显示
-        document.getElementById('dailyComplexity').textContent = '0';
+        document.getElementById('dailyChallengeBtn').textContent = attempts > 0 ? '再试一次' : '开始挑战';
 
         this.draw();
     }
@@ -473,6 +487,7 @@ function startNewGame() {
     if (!game) {
         game = new LockGame(document.getElementById('gameCanvas'));
     }
+    game.canStartNewAttempt = true;  // 确保新游戏可以开始
     const difficulty = parseInt(document.getElementById('difficulty').value);
     game.setTargetPoints(difficulty);
 }
@@ -482,6 +497,10 @@ function switchToNormalMode() {
     document.getElementById('dailyMode').style.display = 'none';
     document.getElementById('normalModeBtn').classList.add('active');
     document.getElementById('dailyModeBtn').classList.remove('active');
+    if (game) {
+        game.isDaily = false;
+        game.canStartNewAttempt = true;  // 重置状态
+    }
     startNewGame();
 }
 
@@ -490,6 +509,10 @@ function switchToDailyMode() {
     document.getElementById('dailyMode').style.display = 'block';
     document.getElementById('normalModeBtn').classList.remove('active');
     document.getElementById('dailyModeBtn').classList.add('active');
+    if (game) {
+        game.isDaily = true;
+        game.canStartNewAttempt = true;  // 重置状态
+    }
     startDailyChallenge();
 }
 
