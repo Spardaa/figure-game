@@ -37,12 +37,25 @@ class LockGame {
     }
 
     setupEventListeners() {
-        this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        this.canvas.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        this.canvas.addEventListener('mousedown', this.handleStart.bind(this));
+        this.canvas.addEventListener('mousemove', this.handleMove.bind(this));
+        this.canvas.addEventListener('mouseup', this.handleEnd.bind(this));
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleStart(e.touches[0]);
+        });
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            this.handleMove(e.touches[0]);
+        });
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.handleEnd();
+        });
     }
 
-    handleMouseDown(e) {
+    handleStart(e) {
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -56,7 +69,7 @@ class LockGame {
         }
     }
 
-    handleMouseMove(e) {
+    handleMove(e) {
         if (!this.isDrawing) return;
         
         const rect = this.canvas.getBoundingClientRect();
@@ -73,7 +86,7 @@ class LockGame {
         this.draw();
     }
 
-    handleMouseUp() {
+    handleEnd() {
         if (!this.isDrawing) return;
         
         this.isDrawing = false;
